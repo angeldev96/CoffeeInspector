@@ -28,7 +28,7 @@ while True:
 
         # Enviar los datos de la detección al servidor Flask
         data = {
-            'object': class_id,
+            'object': model.names[class_id],
             'confidence': confidence
         }
 
