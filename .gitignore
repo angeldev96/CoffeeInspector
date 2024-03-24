@@ -1,3 +1,6 @@
 ai_env
 /runs
 yolov8l.pt
+server/yolov8n.pt
+services/yolov8n.pt
+services/yolov5su.pt

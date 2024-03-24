@@ -15,7 +15,7 @@ def register_detection():
     confidence = detection['confidence']
 
     # Conectar a la base de datos
-    conn = sqlite3.connect('database/detections.db')
+    conn = sqlite3.connect('detections.db')
     c = conn.cursor()
 
     print("Database connection successful!")  # Mensaje en consola
