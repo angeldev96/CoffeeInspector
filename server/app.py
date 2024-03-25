@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import sqlite3
 
 app = Flask(__name__)
@@ -9,31 +9,40 @@ def home():
 
 @app.route('/register_detection', methods=['POST'])
 def register_detection():
-    # Extraer información de la detección
-    detection = request.get_json()
-    object = detection['object']
-    confidence = detection['confidence']
+    try:
+        # Extraer información de la detección
+        detection = request.get_json()
+        object = detection.get('object')
+        confidence = detection.get('confidence')
 
-    # Conectar a la base de datos
-    conn = sqlite3.connect('detections.db')
-    c = conn.cursor()
+        if not object or not confidence:
+            return jsonify({"error": "Missing object or confidence in request"}), 400
 
-    print("Database connection successful!")  # Mensaje en consola
+        # Conectar a la base de datos
+        conn = sqlite3.connect('detections.db')
+        c = conn.cursor()
 
-    # Insertar la detección en la base de datos
-    c.execute("""
-        INSERT INTO detections (object, confidence)
-        VALUES (?, ?)
-    """, (object, confidence))
+        print("Database connection successful!")  # Mensaje en consola
 
-    # Guardar los cambios y cerrar la conexión
-    conn.commit()
-    conn.close()
+        # Insertar la detección en la base de datos
+        c.execute("""
+            INSERT INTO detections (object, confidence)
+            VALUES (?, ?)
+        """, (object, confidence))
 
-    print("Database connection closed.")  # Mensaje en consola
+        # Guardar los cambios y cerrar la conexión
+        conn.commit()
+        conn.close()
 
-    return "Detected object registered successfully!"
+        print("Database connection closed.")  # Mensaje en consola
+
+        return jsonify({"message": "Detected object registered successfully!"}), 200
+
+    except sqlite3.Error as e:
+        return jsonify({"error": str(e)}), 500
+
+    except Exception as e:
+        return jsonify({"error": "An unexpected error occurred"}), 500
 
 if __name__ == '__main__':
     app.run()
-
