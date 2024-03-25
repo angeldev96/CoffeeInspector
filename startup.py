@@ -8,4 +8,4 @@ subprocess.Popen(["python", "server/app.py"])
 time.sleep(10)
 
 # Iniciar el script de detección
-subprocess.Popen(["python", "services/detect.py"])
+subprocess.Popen(["python", "model/detect.py"])
