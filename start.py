@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify
 import sqlite3
-import threading
+from multiprocessing import Process
 import cv2
 import requests
-from ultralytics import YOLO
+from ultralytics import YOLO  # Asegúrate de que este módulo esté correctamente instalado y configurado
 import time
+from waitress import serve
 
 # Inicialización del servidor Flask
 app = Flask(__name__)
@@ -42,12 +43,9 @@ def register_detection():
     except Exception as e:
         return jsonify({"error": "An unexpected error occurred"}), 500
 
-def run_flask_app():
-    app.run(debug=False)  # Cambia debug a False para producción
-
 # Función para manejar la detección y envío de datos
 def run_detection():
-    model = YOLO('yolov8n.pt')
+    model = YOLO('yolov8n.pt')  # Asegúrate de tener el modelo correcto y la ruta especificada
     cap = cv2.VideoCapture(0)
     last_request_time = 0
 
@@ -84,9 +82,12 @@ def run_detection():
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    # Crear e iniciar el hilo del servidor Flask
-    flask_thread = threading.Thread(target=run_flask_app)
-    flask_thread.start()
+    # Crear e iniciar el proceso para la detección
+    detection_process = Process(target=run_detection)
+    detection_process.start()
 
-    # Ejecutar la detección en el hilo principal
-    run_detection()
+    # Iniciar el servidor Flask con Waitress
+    serve(app, host="0.0.0.0", port=5000)
+    
+    # Esperar a que el proceso de detección termine (opcional)
+    detection_process.join()
